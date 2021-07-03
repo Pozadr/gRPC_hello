@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package calc;
+
+option java_package = "pl.pozadr.calc";
+option java_multiple_files = true;
+
+message SumRequest {
+  int32 number1 = 1;
+  int32 number2 = 2;}
+
+message SumResponse {
+  int32 sum_result = 1;
+}
+
+message PrimeNumberDecompositionRequest {
+  int32 number_to_decompose = 1;
+}
+
+message PrimeNumberDecompositionResponse {
+  int32 decomposition_number = 1;
+}
+
+message ComputeAverageRequest {
+  int64 number_to_calculate = 1;
+}
+
+message ComputeAverageResponse {
+  double average = 1;
+}
+
+message FindMaximumRequest {
+  int64 number_to_compare = 1;
+}
+
+message FindMaximumResponse {
+  double maximum = 1;
+}
+
+message SquareRootRequest {
+  int64 number = 1;
+}
+
+message SquareRootResponse {
+  double number_root = 1;
+}
+
+service CalcService {
+  // Unary
+  rpc Add(SumRequest) returns (SumResponse) {};
+  // server side streaming
+  rpc PrimeNumberDecomposition(PrimeNumberDecompositionRequest)
+      returns (stream PrimeNumberDecompositionResponse) {};
+  // client side streaming
+  rpc ComputeAverage(stream ComputeAverageRequest) returns (ComputeAverageResponse) {};
+  // bi directional streaming
+  rpc FindMaximum(stream FindMaximumRequest) returns (stream FindMaximumResponse) {};
+  // error handling
+  // this RPC will throw exception if the sent number is negative
+  rpc SquareRoot(SquareRootRequest) returns (SquareRootResponse) {};
+}
