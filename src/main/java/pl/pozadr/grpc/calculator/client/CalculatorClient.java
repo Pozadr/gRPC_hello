@@ -27,7 +27,7 @@ public class CalculatorClient {
     doServerStreamingCall(channel);
     doClientStreamingCall(channel);
     doBiDirectionalStreamingCall(channel);
-    doErrorCall(channel);
+    //doErrorCall(channel);
 
     System.out.println("Shutting down the channel.");
     channel.shutdown();
