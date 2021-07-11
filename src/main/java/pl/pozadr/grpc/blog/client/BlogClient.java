@@ -19,10 +19,10 @@ public class BlogClient {
                 .build();
 
         createBlog(channel);
-        readBlog(channel, "60e1e01fef63c75c58f3bbf1");
-        updateBlog(channel, "60e1e01fef63c75c58f3bbf1");
-        readBlog(channel, "60e1e01fef63c75c58f3bbf1");
-        deleteBlog(channel, "60e1e01fef63c75c58f3bbf1");
+        readBlog(channel, "60eaf7986bad2d1fbdfaa7ae");
+        updateBlog(channel, "60eaf7986bad2d1fbdfaa7ae");
+        //deleteBlog(channel, "60e1e01fef63c75c58f3bbf1");
+        listBlogs(channel);
 
 
         channel.shutdown();
@@ -34,8 +34,8 @@ public class BlogClient {
 
         var blog = Blog.newBuilder()
                 .setAuthorId("Adrian")
-                .setTitle("New Blog")
-                .setContent("Blog hello world!!")
+                .setTitle("New Blog 4")
+                .setContent("Blog hello world 4!!")
                 .build();
 
         var request = CreateBlogRequest.newBuilder()
@@ -92,5 +92,19 @@ public class BlogClient {
         var response = blogClient.deleteBlog(request);
         System.out.println("Blog deleted. Response: ");
         System.out.println(response.toString());
+    }
+
+
+    private void listBlogs(ManagedChannel channel) {
+        System.out.println("List Blogs");
+        var blogClient = BlogServiceGrpc.newBlockingStub(channel);
+
+        var request = ListBlogRequest.newBuilder().build();
+        var response = blogClient.listBlog(request);
+
+        System.out.println("List Blogs. Response: ");
+        response.forEachRemaining(blog -> {
+            System.out.println(blog.toString());
+        });
     }
 }
