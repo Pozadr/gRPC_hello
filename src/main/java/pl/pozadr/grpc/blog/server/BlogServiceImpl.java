@@ -90,6 +90,24 @@ public class BlogServiceImpl extends BlogServiceGrpc.BlogServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void deleteBlog(DeleteBlogRequest request, StreamObserver<DeleteBlogResponse> responseObserver) {
+        System.out.println("Received Delete Blog request");
+        var blogIdToDelete = request.getBlogId();
+
+        var documentToDelete = getDocument(responseObserver, blogIdToDelete);
+
+        collection.deleteOne(eq("_id", documentToDelete.getObjectId("_id")));
+
+        var response = DeleteBlogResponse.newBuilder()
+                .setBlogId(documentToDelete.getObjectId("_id").toString())
+                .build();
+
+        System.out.println("Blog deleted. Sending as a response.");
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
     private Document getDocument(StreamObserver responseObserver, String id) {
         System.out.println("Searching for a Blog to update");
         Document result = null;

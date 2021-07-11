@@ -18,10 +18,11 @@ public class BlogClient {
                 .usePlaintext() // disable SSL
                 .build();
 
-        //createBlog(channel);
-        readBlog(channel,"60e1e01fef63c75c58f3bbf1");
+        createBlog(channel);
+        readBlog(channel, "60e1e01fef63c75c58f3bbf1");
         updateBlog(channel, "60e1e01fef63c75c58f3bbf1");
-        readBlog(channel,"60e1e01fef63c75c58f3bbf1");
+        readBlog(channel, "60e1e01fef63c75c58f3bbf1");
+        deleteBlog(channel, "60e1e01fef63c75c58f3bbf1");
 
 
         channel.shutdown();
@@ -69,7 +70,7 @@ public class BlogClient {
                 .setId(blogId)
                 .setAuthorId("Admin")
                 .setTitle("Update Blog")
-                .setContent("Blog Updated !")
+                .setContent("Blog Updated 2222!")
                 .build();
 
         var request = UpdateBlogRequest.newBuilder()
@@ -81,4 +82,15 @@ public class BlogClient {
         System.out.println(response.toString());
     }
 
+    private void deleteBlog(ManagedChannel channel, String blogId) {
+        System.out.println("Deleting Blog");
+        var blogClient = BlogServiceGrpc.newBlockingStub(channel);
+        var request = DeleteBlogRequest.newBuilder()
+                .setBlogId(blogId)
+                .build();
+
+        var response = blogClient.deleteBlog(request);
+        System.out.println("Blog deleted. Response: ");
+        System.out.println(response.toString());
+    }
 }
