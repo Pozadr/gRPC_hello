@@ -5,6 +5,7 @@ import io.grpc.ManagedChannelBuilder;
 import pl.pozadr.blog.Blog;
 import pl.pozadr.blog.BlogServiceGrpc;
 import pl.pozadr.blog.CreateBlogRequest;
+import pl.pozadr.blog.ReadBlogRequest;
 
 public class BlogClient {
 
@@ -20,6 +21,15 @@ public class BlogClient {
                 .usePlaintext() // disable SSL
                 .build();
 
+        //createBlog(channel);
+        readBlog(channel,"60e1e01fef63c75c58f3bbf1");
+
+
+       channel.shutdown();
+    }
+
+    private void createBlog(ManagedChannel channel) {
+        System.out.println("Creating Blog");
         var blogClient = BlogServiceGrpc.newBlockingStub(channel);
 
         var blog = Blog.newBuilder()
@@ -37,4 +47,19 @@ public class BlogClient {
         System.out.println("Received create blog response");
         System.out.println(response.toString());
     }
+
+    private void readBlog(ManagedChannel channel, String blogId) {
+        System.out.println("Reading Blog");
+        var blogClient = BlogServiceGrpc.newBlockingStub(channel);
+
+        var request = ReadBlogRequest.newBuilder()
+                .setBlogId(blogId)
+                .build();
+
+        var response = blogClient.readBlog(request);
+
+        System.out.println("Received read blog response");
+        System.out.println(response.toString());
+    }
+
 }
