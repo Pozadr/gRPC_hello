@@ -49,9 +49,52 @@ public class BlogServiceImpl extends BlogServiceGrpc.BlogServiceImplBase {
         var blogId = request.getBlogId();
 
         System.out.println("Searching for a Blog");
+        Document result = getDocument(responseObserver, blogId);
+
+        System.out.println("Blog found, sending response.");
+        var blog = documentToBlog(result);
+
+        var response = ReadBlogResponse.newBuilder()
+                .setBlog(blog)
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+
+    }
+
+    @Override
+    public void updateBlog(UpdateBlogRequest request, StreamObserver<UpdateBlogResponse> responseObserver) {
+        System.out.println("Received Update Blog request");
+        var requestBlog = request.getBlog();
+        var requestBlogId = requestBlog.getId();
+
+        System.out.println("Searching for a Blog to update");
+        var documentToUpdate = getDocument(responseObserver, requestBlogId);
+
+        System.out.println("Blog found, updating Blog with id: " + requestBlogId);
+        var replacement = new Document("_id", new ObjectId(requestBlogId))
+                .append("author_id", requestBlog.getAuthorId())
+                .append("title", requestBlog.getTitle())
+                .append("content", requestBlog.getContent());
+
+        collection.replaceOne(eq("_id", documentToUpdate.getObjectId("_id")), replacement);
+
+        var responseBlog = documentToBlog(replacement);
+        var response = UpdateBlogResponse.newBuilder()
+                .setBlog(responseBlog)
+                .build();
+
+        System.out.println("Blog updated. Sending as a response.");
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    private Document getDocument(StreamObserver responseObserver, String id) {
+        System.out.println("Searching for a Blog to update");
         Document result = null;
         try {
-            result = collection.find(eq("_id", new ObjectId(blogId)))
+            result = collection.find(eq("_id", new ObjectId(id)))
                     .first();
         } catch (IllegalArgumentException ex) {
             System.out.println("Blog Not found");
@@ -61,28 +104,24 @@ public class BlogServiceImpl extends BlogServiceGrpc.BlogServiceImplBase {
                             .asRuntimeException()
             );
         }
-
         if (result == null) {
             System.out.println("Blog Not found");
             responseObserver.onError(
                     Status.NOT_FOUND.withDescription("The blog with corresponding id was not found")
                             .asRuntimeException()
             );
+            return new Document();
         } else {
-            System.out.println("Blog found, sending response.");
-            var blog = Blog.newBuilder()
-                    .setId(result.get("_id").toString())
-                    .setAuthorId(result.getString("author_id"))
-                    .setTitle(result.getString("title"))
-                    .setContent(result.getString("content"))
-                    .build();
-
-            var response = ReadBlogResponse.newBuilder()
-                    .setBlog(blog)
-                    .build();
-
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
+            return result;
         }
+    }
+
+    private Blog documentToBlog(Document document) {
+        return Blog.newBuilder()
+                .setId(document.getObjectId("_id").toString())
+                .setAuthorId(document.getString("author_id"))
+                .setTitle(document.getString("title"))
+                .setContent(document.getString("content"))
+                .build();
     }
 }
